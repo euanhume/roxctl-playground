@@ -2,6 +2,8 @@
 
 This repository demonstrates how to use OIDC authentication with Red Hat Advanced Cluster Security (RHACS) in GitHub Actions, eliminating the need for long-lived API tokens. The image below shows the required machine access configuration on the ACS side.
 
+The GitHub Actions workflow authenticates with a RHACS instance using OIDC and performs a security scan of the `registry.redhat.io/rhel8/httpd-24:latest` container image. 
+
 ![RHACS OIDC Configuration](images/rhacs-oidc-config.png)
 
 References:
