@@ -6,6 +6,10 @@ The GitHub Actions workflow authenticates with a RHACS instance using OIDC and p
 
 ![RHACS OIDC Configuration](images/rhacs-oidc-config.png)
 
+The image below shows a successful workflow run authenticating with RHACS using OIDC and displaying the container image scan results:
+
+![scan-httpd workflow](images/scan-httpd.png)
+
 References:
 
 - [Install roxctl - Authenticate with short-lived access tokens](https://github.com/marketplace/actions/install-roxctl#authenticate-with-short-lived-access-tokens)
