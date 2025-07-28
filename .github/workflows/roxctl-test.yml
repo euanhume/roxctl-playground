@@ -22,6 +22,7 @@ jobs:
         with:
           central-endpoint: ${{ env.CENTRAL_ENDPOINT }}
           central-token: ${{ env.ROX_API_TOKEN }}
+          skip-tls-verify: true
       - name: Scan image with roxctl
         shell: bash
         run: |
