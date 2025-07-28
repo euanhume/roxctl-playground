@@ -26,6 +26,7 @@ jobs:
       - name: Verify OIDC Authentication
         shell: bash
         run: |
+          echo $ROX_API_TOKEN
           roxctl central whoami --insecure-skip-tls-verify
       - name: Scan image with roxctl
         shell: bash
