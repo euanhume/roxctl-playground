@@ -1,0 +1,28 @@
+name: RHACS roxctl HTTPD Scan
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for OIDC token exchange
+
+jobs:
+  scan-httpd:
+    runs-on: ubuntu-latest
+    env:
+      CENTRAL_ENDPOINT: ${{ secrets.CENTRAL_ENDPOINT }}
+
+    steps:
+      - name: Central login
+        uses: stackrox/central-login@v1
+        with:
+          endpoint: ${{ env.CENTRAL_ENDPOINT }}
+      - name: Install roxctl
+        uses: stackrox/roxctl-installer-action@v1
+        with:
+          central-endpoint: ${{ env.CENTRAL_ENDPOINT }}
+          central-token: ${{ env.ROX_API_TOKEN }}
+      - name: Scan image with roxctl
+        shell: bash
+        run: |
+          roxctl image scan --output=table --image="registry.redhat.io/rhel8/httpd-24:latest" --insecure-skip-tls-verify
