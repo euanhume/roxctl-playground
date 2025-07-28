@@ -23,6 +23,10 @@ jobs:
           central-endpoint: ${{ env.CENTRAL_ENDPOINT }}
           central-token: ${{ env.ROX_API_TOKEN }}
           skip-tls-verify: true
+      - name: Verify OIDC Authentication
+        shell: bash
+        run: |
+          roxctl central whoami
       - name: Scan image with roxctl
         shell: bash
         run: |
