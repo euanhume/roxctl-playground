@@ -23,7 +23,7 @@ spec:
     - name: ROX_IMAGE
       type: string
       description: Container image providing the `roxctl` CLI
-      default: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8@sha256:d4b3c0f626b4b007ca077c63fa4b35422dd235c1d0d8c01a0a99740c7b7f19eb
+      default: quay.io/stackrox-io/roxctl:latest
     - name: ROX_CONFIG_DIR
       type: string
       description: Path within the roxctl-config workspace where the rhacs‑m2m‑authenticate task writes the config
