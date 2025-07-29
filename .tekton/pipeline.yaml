@@ -1,0 +1,108 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: rhacs-httpd-scan
+spec:
+  description: >-
+    This pipeline logs into a Red Hat Advanced Cluster Security (RHACS) Central
+    instance using the rhacs‑m2m‑authenticate task, verifies the authentication
+    using `roxctl central whoami`, and then scans a container image.
+  
+  params:
+    - name: ROX_CENTRAL_ENDPOINT
+      type: string
+      description: RHACS Central endpoint (host:port)
+    - name: IMAGE
+      type: string
+      description: Image to scan
+      default: registry.redhat.io/rhel8/httpd-24:latest
+    - name: INSECURE_SKIP_TLS
+      type: string
+      description: Whether to skip TLS verification when talking to Central
+      default: "true"
+    - name: ROX_IMAGE
+      type: string
+      description: Container image providing the `roxctl` CLI
+      default: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8@sha256:d4b3c0f626b4b007ca077c63fa4b35422dd235c1d0d8c01a0a99740c7b7f19eb
+    - name: ROX_CONFIG_DIR
+      type: string
+      description: Path within the roxctl-config workspace where the rhacs‑m2m‑authenticate task writes the config
+      default: /roxctl-config
+  
+  workspaces:
+    - name: roxctl-config
+      description: Shared workspace for roxctl configuration
+
+  tasks:
+    - name: authenticate
+      taskRef:
+        name: rhacs-m2m-authenticate
+      params:
+        - name: rox_central_endpoint
+          value: $(params.ROX_CENTRAL_ENDPOINT)
+        - name: insecure-skip-tls-verify
+          value: $(params.INSECURE_SKIP_TLS)
+        - name: rox_image
+          value: $(params.ROX_IMAGE)
+        - name: rox_config_dir
+          value: $(params.ROX_CONFIG_DIR)
+      workspaces:
+        - name: roxctl-config
+          workspace: roxctl-config
+
+    - name: verify-auth
+      runAfter:
+        - authenticate
+      params:
+        - name: rox_image
+          value: $(params.ROX_IMAGE)
+        - name: insecure_skip_tls
+          value: $(params.INSECURE_SKIP_TLS)
+        - name: rox_central_endpoint
+          value: $(params.ROX_CENTRAL_ENDPOINT)
+      workspaces:
+        - name: roxctl-config
+          workspace: roxctl-config
+      taskSpec:
+        params:
+          - name: rox_image
+            type: string
+          - name: insecure_skip_tls
+            type: string
+          - name: rox_central_endpoint
+            type: string
+        workspaces:
+          - name: roxctl-config
+            mountPath: /roxctl-config
+        steps:
+          - name: whoami
+            image: $(params.rox_image)
+            workingDir: /roxctl-config
+            args:
+              - central
+              - whoami
+              - "--endpoint=$(params.rox_central_endpoint)"
+              - "--insecure-skip-tls-verify=$(params.insecure_skip_tls)"
+            env:
+              - name: ROX_CONFIG_DIR
+                value: /roxctl-config
+
+    - name: scan-image
+      runAfter:
+        - verify-auth
+      taskRef:
+        name: rhacs-image-scan
+      params:
+        - name: image
+          value: $(params.IMAGE)
+        - name: output_format
+          value: table
+        - name: rox_central_endpoint
+          value: $(params.ROX_CENTRAL_ENDPOINT)
+        - name: insecure-skip-tls-verify
+          value: $(params.INSECURE_SKIP_TLS)
+        - name: rox_config_dir
+          value: $(params.ROX_CONFIG_DIR)
+      workspaces:
+        - name: roxctl-config
+          workspace: roxctl-config

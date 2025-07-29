@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: rhacs-httpd-scan-run
+spec:
+  pipelineRef:
+    name: rhacs-httpd-scan
+  serviceAccountName: pipeline
+  params:
+    - name: ROX_CENTRAL_ENDPOINT
+      value: central.stackrox.svc:443
+    - name: IMAGE
+      value: registry.redhat.io/rhel8/httpd-24:latest
+    - name: INSECURE_SKIP_TLS
+      value: "true"
+    - name: ROX_IMAGE
+      value: quay.io/stackrox-io/roxctl:latest
+    - name: ROX_CONFIG_DIR
+      value: /roxctl-config
+  workspaces:
+    - name: roxctl-config
+      persistentVolumeClaim:
+        claimName: roxctl-config-pvc
